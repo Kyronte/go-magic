@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -27,6 +26,18 @@ type card struct {
 	ColorIdentity []string `json:"colorIdentity"`
 }
 
+type info struct {
+	CardID  string `json:"ID"`
+	Name    string `json:"Name"`
+	Group   string `json:"Group"`
+	Snippet string `json:"Snippet"`
+}
+
+type results struct {
+	Results     []info
+	SearchChars string
+}
+
 type collection map[string]card
 
 func main() {
@@ -35,7 +46,7 @@ func main() {
 	jsonFile, err := os.Open("allcards.json")
 	// if we os.Open returns an error then handle it
 	if err != nil {
-		fmt.Println(err)
+		log.Panic(err.Error())
 	}
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
@@ -45,9 +56,7 @@ func main() {
 
 	json.Unmarshal([]byte(byteValue), &col)
 
-	//col.prettyPrintCard("Blinkmoth Infusion")
-
-	tryToPrintMultiverseID("Blinkmoth Infusion")
+	requestCardInfo("Brushland")
 
 }
 
@@ -56,13 +65,13 @@ func (col collection) prettyPrintCard(card string) {
 	fmt.Println("ManaCost:", col[card].ManaCost)
 	fmt.Println("Type:", col[card].Type)
 	fmt.Println("Text:", col[card].Text)
-	if isACreature(col[card].Types, "Creature") {
+	if containsType(col[card].Types, "Creature") {
 		fmt.Println("Power", col[card].Power)
 		fmt.Println("Toughness", col[card].Toughness)
 	}
 }
 
-func isACreature(t []string, s string) bool {
+func containsType(t []string, s string) bool {
 	for _, a := range t {
 		if a == s {
 			return true
@@ -71,13 +80,29 @@ func isACreature(t []string, s string) bool {
 	return false
 }
 
-func tryToPrintMultiverseID(card string) {
+func requestCardInfo(card string) {
 	url := fmt.Sprintf("http://gatherer.wizards.com/Handlers/InlineCardSearch.ashx?nameFragment=%+v", card)
 	formattedURL := strings.Replace(url, " ", "%20", -1)
-	//fmt.Println(formatteURL)
-	r, err := http.Get(formattedURL)
+
+	//Fetch and save response from call
+	resp, err := http.Get(formattedURL)
 	if err != nil {
-		log.Panic(err)
+		panic(err.Error())
 	}
-	io.Copy(os.Stdout, r.Body)
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var res results
+	json.Unmarshal([]byte(body), &res)
+
+	fmt.Println(fetchCardImageURL(res.Results[0].CardID))
+
+	//io.Copy(os.Stdout, r.Body)
+}
+
+func fetchCardImageURL(id string) string {
+	return fmt.Sprintf("http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=%+v&type=card", id)
 }
