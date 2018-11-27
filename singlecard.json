@@ -1,0 +1,26 @@
+{
+    "Adorable Kitten": {
+      "layout": "normal",
+      "name": "Adorable Kitten",
+      "manaCost": "{W}",
+      "cmc": 1,
+      "colors": [
+        "White"
+      ],
+      "type": "Host Creature — Cat",
+      "types": [
+        "Host",
+        "Creature"
+      ],
+      "subtypes": [
+        "Cat"
+      ],
+      "text": "When this creature enters the battlefield, roll a six-sided die. You gain life equal to the result.",
+      "power": "1",
+      "toughness": "1",
+      "imageName": "adorable kitten",
+      "colorIdentity": [
+        "W"
+      ]
+    }
+}
