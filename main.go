@@ -3,8 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
+	"strings"
 )
 
 type card struct {
@@ -33,17 +37,47 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("Successfully Opened singlecard.json")
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	var col collection
 
-	//fmt.Println("Byteslice contains:", &byteValue)
-
 	json.Unmarshal([]byte(byteValue), &col)
 
-	fmt.Println(col["Aerial Toastmaster"])
+	//col.prettyPrintCard("Blinkmoth Infusion")
 
+	tryToPrintMultiverseID("Blinkmoth Infusion")
+
+}
+
+func (col collection) prettyPrintCard(card string) {
+	fmt.Println("Name:", col[card].Name)
+	fmt.Println("ManaCost:", col[card].ManaCost)
+	fmt.Println("Type:", col[card].Type)
+	fmt.Println("Text:", col[card].Text)
+	if isACreature(col[card].Types, "Creature") {
+		fmt.Println("Power", col[card].Power)
+		fmt.Println("Toughness", col[card].Toughness)
+	}
+}
+
+func isACreature(t []string, s string) bool {
+	for _, a := range t {
+		if a == s {
+			return true
+		}
+	}
+	return false
+}
+
+func tryToPrintMultiverseID(card string) {
+	url := fmt.Sprintf("http://gatherer.wizards.com/Handlers/InlineCardSearch.ashx?nameFragment=%+v", card)
+	formatted_url := strings.Replace(url, " ", "%20", -1)
+	fmt.Println(formatted_url)
+	r, err := http.Get(formatted_url)
+	if err != nil {
+		log.Panic(err)
+	}
+	io.Copy(os.Stdout, r.Body)
 }
