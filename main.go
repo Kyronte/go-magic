@@ -23,31 +23,27 @@ type card struct {
 	ColorIdentity []string `json:"colorIdentity"`
 }
 
-type collection struct {
-	Card card
-}
+type collection map[string]card
 
 func main() {
 
 	// Open our jsonFile
-	jsonFile, err := os.Open("singlecard.json")
+	jsonFile, err := os.Open("allcards.json")
 	// if we os.Open returns an error then handle it
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("Successfully Opened users.json")
+	fmt.Println("Successfully Opened singlecard.json")
 	// defer the closing of our jsonFile so that we can parse it later on
-	// defer jsonFile.Close()
+	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	var col collection
 
 	//fmt.Println("Byteslice contains:", &byteValue)
 
-	error := json.Unmarshal(byteValue, &col)
-	if error != nil {
-		fmt.Println("error:", err)
-	}
-	fmt.Printf("%+v", col)
+	json.Unmarshal([]byte(byteValue), &col)
+
+	fmt.Println(col["Aerial Toastmaster"])
 
 }
