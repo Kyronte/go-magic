@@ -73,9 +73,9 @@ func isACreature(t []string, s string) bool {
 
 func tryToPrintMultiverseID(card string) {
 	url := fmt.Sprintf("http://gatherer.wizards.com/Handlers/InlineCardSearch.ashx?nameFragment=%+v", card)
-	formatted_url := strings.Replace(url, " ", "%20", -1)
-	fmt.Println(formatted_url)
-	r, err := http.Get(formatted_url)
+	formattedURL := strings.Replace(url, " ", "%20", -1)
+	//fmt.Println(formatteURL)
+	r, err := http.Get(formattedURL)
 	if err != nil {
 		log.Panic(err)
 	}
